@@ -1410,10 +1410,25 @@ serverFiles:
           - targets:
             - localhost:9090
             
-      - job_name: gabiroba
-        static_configs:
-          - targets:
-            - localhost:9090            
+        - job_name: blackbox
+          metrics_path: /probe
+          params:
+            module: [http_2xx]
+          static_configs:
+            - targets:
+              - https://www.robustperception.io/
+              - http://prometheus.io/blog
+              - http://yourdomain/usage-api/health
+              - http://yourdomain/google-apm/health
+              - https://google.com            
+              - https://www.telegraph.co.uk            
+          relabel_configs:
+            - source_labels: [__address__]
+              target_label: __param_target
+            - source_labels: [__param_target]
+              target_label: instance
+            - target_label: __address__
+              replacement: blackbox-exporter-svc.prometheus.svc.cluster.local:9115 # Blackbox exporter.       
 
       # A scrape configuration for running Prometheus on a Kubernetes cluster.
       # This uses separate scrape configs for cluster components (i.e. API server, node)
